@@ -8,6 +8,7 @@ import {
   Tooltip,
   Filler,
   BarElement,
+  BarController,
   ChartOptions,
   ChartData,
 } from "chart.js";
@@ -39,6 +40,7 @@ ChartJS.register(
   Tooltip,
   Filler,
   BarElement,
+  BarController,
   annotationPlugin
 );
 

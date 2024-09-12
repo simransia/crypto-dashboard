@@ -1,6 +1,7 @@
 import {
   Chart as ChartJS,
   LineElement,
+  LineController,
   CategoryScale,
   LinearScale,
   PointElement,
@@ -31,6 +32,7 @@ type Props = {
 
 ChartJS.register(
   LineElement,
+  LineController,
   CategoryScale,
   LinearScale,
   PointElement,

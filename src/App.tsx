@@ -27,16 +27,6 @@ const ChartComponent: React.FC = () => {
     selectedRange,
   });
 
-  const priceChange24h = marketData
-    ? marketData?.price_change_percentage_24h
-    : 0;
-
-  const currentPrice = chartData[chartData.length - 1].value;
-  const priceChange =
-    chartData.length > 0
-      ? chartData[chartData.length - 1].value - chartData[0].value
-      : 0;
-
   if (
     CoindataLoading ||
     ChartDataLoading ||
@@ -46,16 +36,28 @@ const ChartComponent: React.FC = () => {
     return <div className="text-center">Loading...</div>;
   }
 
+  const priceChange24h = marketData
+    ? marketData?.price_change_percentage_24h
+    : 0;
+
+  const currentPrice = chartData ? chartData[chartData.length - 1].value : 0;
+  const priceChange =
+    chartData.length > 0
+      ? chartData[chartData.length - 1].value - chartData[0].value
+      : 0;
+
   return (
     <div className="p-5">
       <div
         className={`border pb-5 border-gray-100 shadow rounded-md ${
-          expand ? "h-full" : "w-1/2 mx-auto min-w-max"
+          expand
+            ? "h-full w-full"
+            : "md:min-w-[75%] xl:min-w-[60%] xl:max-w-[60%] mx-auto md:max-w-[75%]"
         }`}
       >
         <Header currentPrice={currentPrice} priceChange={priceChange} />
-        <Tabs defaultValue="chart" className="w-full mx-auto mt-6">
-          <TabsList className="grid w-[60%] grid-cols-5 bg-transparent border-b rounded-none">
+        <Tabs defaultValue="chart" className="w-full min-h-[400px]">
+          <TabsList className="grid md:w-[60%] grid-cols-5 bg-transparent border-b rounded-none">
             {TABS.map((item, index) => (
               <TabsTrigger key={index} value={item.value}>
                 {item.label}

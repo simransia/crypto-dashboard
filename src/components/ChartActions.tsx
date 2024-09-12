@@ -16,8 +16,8 @@ const ChartActions = ({
   setExpand,
 }: Props) => {
   return (
-    <div className="flex py-4 text-[#6F7177] items-center justify-between">
-      <div className="flex text-sm gap-4">
+    <div className="flex flex-col gap-2 md:flex-row py-4 px-6 w-full max-w-full text-[#6F7177] items-center justify-between">
+      <div className="flex text-sm gap-4 w-1/3">
         <div
           className="flex gap-1 items-center cursor-pointer hover:text-black"
           onClick={() => setExpand(!expand)}
@@ -31,11 +31,11 @@ const ChartActions = ({
         </div>
         <div className="flex gap-1 items-center">
           <CirclePlus className="text-sm" size={18} />
-          <span>Compare</span>
+          <span className="">Compare</span>
         </div>
       </div>
 
-      <div className="flex w-1/2 justify-center gap-4">
+      <div className="flex w-2/3 justify-end gap-3">
         {Object.keys(TIME_RANGES).map((range) => (
           <button
             key={range}

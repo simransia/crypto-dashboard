@@ -7,10 +7,12 @@ type HeaderProps = {
 
 const Header = ({ currentPrice, priceChange }: HeaderProps) => {
   return (
-    <div className="mb-8 p-5">
+    <div className="mb-2 p-5">
       <h1 className="text-[70px] h-max w-max font-medium relative">
         ${currentPrice?.toFixed(2)}{" "}
-        <span className="text-2xl top-0 right-0 text-[#BDBEBF]">USD</span>
+        <span className="text-2xl absolute top-0 translate-y-[75%] translate-x-[105%] right-0 text-[#BDBEBF]">
+          USD
+        </span>
       </h1>
       <p
         className={`text-ld font-medium mt-2 ${

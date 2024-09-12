@@ -36,15 +36,10 @@ const ChartComponent: React.FC = () => {
     return <div className="text-center">Loading...</div>;
   }
 
-  const priceChange24h = marketData
-    ? marketData?.price_change_percentage_24h
-    : 0;
-
-  const currentPrice = chartData ? chartData[chartData.length - 1].value : 0;
+  const priceChange24h = marketData?.price_change_percentage_24h || 0;
+  const currentPrice = chartData[chartData.length - 1]?.value || 0;
   const priceChange =
-    chartData.length > 0
-      ? chartData[chartData.length - 1].value - chartData[0].value
-      : 0;
+    chartData.length > 0 ? currentPrice - chartData[0].value : 0;
 
   return (
     <div className="p-5">

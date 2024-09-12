@@ -15,7 +15,7 @@ import ChartActions from "./components/ChartActions";
 const ChartComponent: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState<string>("1w");
 
-  const [expand, setExpand] = useState(true);
+  const [expand, setExpand] = useState<boolean>(false);
 
   const { marketData, loading: CoindataLoading } = useCoinData();
 

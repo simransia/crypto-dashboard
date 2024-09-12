@@ -6,19 +6,22 @@ import {
   PointElement,
   Tooltip,
   Filler,
+  BarElement,
   ChartOptions,
+  ChartData,
 } from "chart.js";
-import annotationPlugin, { AnnotationOptions } from "chartjs-plugin-annotation";
-import { Line } from "react-chartjs-2";
-import { ChartData } from "../hooks/useChartData";
-import ChartHeader from "./ChartHeader";
+import annotationPlugin from "chartjs-plugin-annotation";
+import { Chart } from "react-chartjs-2";
 import { useEffect, useRef } from "react";
+import ChartActions from "./ChartActions";
 
 type Props = {
   loading: boolean;
-  setSelectedRange: React.Dispatch<React.SetStateAction<string>>;
-  selectedRange: string;
-  data: ChartData[];
+  data: {
+    date: string;
+    value: number;
+  }[];
+  volumeData: any;
 };
 
 ChartJS.register(
@@ -28,15 +31,17 @@ ChartJS.register(
   PointElement,
   Tooltip,
   Filler,
-  annotationPlugin // Register annotation plugin
+  BarElement,
+  annotationPlugin
 );
 
-const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
-  const chartRef = useRef(null);
+const ChartComponent = ({ data, volumeData }: Props) => {
+  const chartRef = useRef<ChartJS<"line" | "bar">>(null);
 
-  // Extract dates and values from the data
   const dates = data.map((item) => item.date);
   const values = data.map((item) => item.value);
+
+  const volumes = volumeData.map((item: any) => item.value);
 
   useEffect(() => {
     const chart = chartRef.current;
@@ -51,39 +56,47 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
     }
   }, [data]);
 
-  const lastIndex = dates.length - 1;
-  const middleIndex = Math.floor(lastIndex / 2); // Calculate middle point for vertical line
-
-  // const average = values.reduce((a, b) => a + b, 0) / values.length;
-
+  // Calculate average value for annotations
   const average = (ctx: any) => {
-    const values = ctx.chart.data.datasets[0].data;
-    return Math.round(
-      values.reduce((a: any, b: any) => a + b, 0) / values.length
-    );
+    const values = ctx.chart.data.datasets[0].data as number[];
+    return Math.round(values.reduce((a, b) => a + b, 0) / values.length);
   };
 
-  const chartData = {
+  const chartData: ChartData<"line" | "bar", number[], string> = {
     labels: dates,
     datasets: [
       {
         label: "Data",
         data: values,
-        fill: true,
         backgroundColor: "rgba(34, 25, 216, 0.3)",
         borderColor: "rgba(23, 11, 243, 0.8)",
-        tension: 0, // Smooth curve
-        pointRadius: 0, // Hide data points
+        tension: 0,
+        pointRadius: 0,
         borderWidth: 2,
+        type: "line",
+        yAxisID: "y",
+      },
+      {
+        label: "Volume",
+        data: volumes,
+        type: "bar",
+        backgroundColor: "rgba(189, 196, 201, 0.5)",
+        borderColor: "#c1c6c9",
+        borderWidth: 1,
+        yAxisID: "y_volume",
+        barPercentage: 0.6,
       },
     ],
   };
 
-  const chartOptions: ChartOptions<"line"> = {
+  const chartOptions: ChartOptions<"line" | "bar"> = {
     maintainAspectRatio: false,
     elements: {
       line: {
         tension: 0,
+      },
+      bar: {
+        borderSkipped: "bottom",
       },
     },
     layout: {
@@ -105,10 +118,21 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
       y: {
         display: false,
       },
+      y_volume: {
+        display: false,
+        ticks: {
+          display: false,
+        },
+        grid: {
+          drawOnChartArea: false,
+        },
+        min: 0,
+        max: Math.max(...chartData.datasets?.[1]?.data) * 8,
+      },
     },
     plugins: {
       legend: {
-        display: false, // Hide the legend
+        display: false,
       },
       tooltip: {
         enabled: true,
@@ -116,7 +140,7 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
       annotation: {
         clip: false,
         annotations: {
-          annotation: {
+          averageAnnotation: {
             type: "line",
             borderColor: "gray",
             borderDash: [5, 5],
@@ -124,9 +148,17 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
             borderWidth: 0.8,
             label: {
               display: true,
-              content: (ctx: any) => `$${average(ctx).toFixed(0)}`,
+              content: (ctx: any) => `${average(ctx).toFixed(2)}`,
               position: "end",
-              xAdjust: 70,
+              xAdjust: 115,
+              padding: {
+                x: 14,
+                y: 5,
+              },
+              font: {
+                size: 16,
+                weight: "normal",
+              },
             },
             scaleID: "y",
             value: (ctx: any) => average(ctx),
@@ -139,10 +171,18 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
             borderWidth: 0.8,
             label: {
               display: true,
-              content: (ctx: any) => `$${values[values.length - 1].toFixed(0)}`,
+              content: (ctx: any) => `${values[values.length - 1].toFixed(2)}`,
               position: "end",
-              xAdjust: 70, // Adjust if needed
+              xAdjust: 115,
               backgroundColor: "#3a31de",
+              padding: {
+                x: 14,
+                y: 5,
+              },
+              font: {
+                size: 16,
+                weight: "normal",
+              },
             },
             scaleID: "y",
             value: (ctx: any) => values[values.length - 1],
@@ -154,15 +194,16 @@ const Chart = ({ setSelectedRange, selectedRange, data }: Props) => {
 
   return (
     <div className="w-full mt-8">
-      <ChartHeader
-        selectedRange={selectedRange}
-        setSelectedRange={setSelectedRange}
-      />
       <div style={{ height: "300px", width: "100%" }}>
-        <Line ref={chartRef} data={chartData} options={chartOptions} />
+        <Chart
+          ref={chartRef}
+          type="line"
+          data={chartData}
+          options={chartOptions}
+        />
       </div>
     </div>
   );
 };
 
-export default Chart;
+export default ChartComponent;

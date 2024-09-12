@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { TIME_RANGES } from "../constants/timeRanges";
 
-interface ChartData {
+export interface ChartData {
   date: string;
   value: number;
 }
 
-const useChartData = ({ selectedRange }: { selectedRange: string }) => {
+export const useChartData = ({ selectedRange }: { selectedRange: string }) => {
   const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -35,5 +35,3 @@ const useChartData = ({ selectedRange }: { selectedRange: string }) => {
 
   return { data, loading };
 };
-
-export default useChartData;

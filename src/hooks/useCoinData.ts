@@ -13,7 +13,7 @@ export interface MarketData {
   atl: { [currency: string]: number };
 }
 
-const useCoinData = () => {
+export const useCoinData = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [marketData, setMarketData] = useState<MarketData | null>(null);
 
@@ -36,5 +36,3 @@ const useCoinData = () => {
 
   return { marketData, loading };
 };
-
-export default useCoinData;

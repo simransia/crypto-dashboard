@@ -1,76 +1,87 @@
-import React, { useState } from "react";
-
+import React, { Fragment, useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./components/ui/tabs";
 import { Analysis, Chart, Settings, Statistics, Summary } from "./components";
-import useCoinData from "./hooks/useCoinData";
-
-// Define available tabs
-const tabs = ["Summary", "Chart", "Statistics", "Analysis", "Settings"];
+import { useCoinData, useChartData } from "./hooks";
+import { TABS } from "./constants/tabs";
 
 const ChartComponent: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<string>("Chart");
+  const [selectedRange, setSelectedRange] = useState<string>("1w");
 
-  const { marketData, loading } = useCoinData();
+  const { marketData, loading: CoindataLoading } = useCoinData();
 
-  if (loading || !marketData) {
+  const { data: chartData, loading: ChartDataLoading } = useChartData({
+    selectedRange,
+  });
+
+  const currentPrice = marketData ? marketData?.current_price.usd : 0;
+
+  const priceChange24h = marketData
+    ? marketData?.price_change_percentage_24h
+    : 0;
+
+  // const currentPrice=chartData[chartData.length - 1].value;
+  const priceChange =
+    chartData.length > 0
+      ? chartData[chartData.length - 1].value - chartData[0].value
+      : 0;
+
+  if (
+    CoindataLoading ||
+    ChartDataLoading ||
+    !marketData ||
+    chartData.length === 0
+  ) {
     return <div className="text-center">Loading...</div>;
   }
 
-  const currentPrice = marketData.current_price.usd;
-
-  const priceChange24h = marketData.price_change_percentage_24h;
-
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case "Summary":
-        return <Summary marketData={marketData} currentPrice={currentPrice} />;
-      case "Chart":
-        return <Chart />;
-      case "Statistics":
-        return (
-          <Statistics marketData={marketData} priceChange24h={priceChange24h} />
-        );
-      case "Analysis":
-        return <Analysis priceChange24h={priceChange24h} />;
-      case "Settings":
-        return <Settings />;
-      default:
-        return null;
-    }
-  };
+  console.log(chartData, "here");
 
   return (
-    <div className="p-8 font-sans text-gray-900">
-      {/* Price Information */}
+    <div>
       <div className="text-center mb-8">
-        <h1 className="text-6xl font-bold">${currentPrice.toFixed(2)} USD</h1>
+        <h1 className="text-6xl font-bold">${currentPrice?.toFixed(2)} USD</h1>
         <p
           className={`text-xl mt-2 ${
-            priceChange24h >= 0 ? "text-green-500" : "text-red-500"
+            priceChange >= 0 ? "text-green-500" : "text-red-500"
           }`}
         >
-          {priceChange24h >= 0 ? "+" : ""}
-          {priceChange24h.toFixed(2)}% (24h)
+          {priceChange >= 0 ? "+" : "-"}
+          {Math.abs(priceChange).toFixed(2)} (
+          {((priceChange / currentPrice) * 100).toFixed(2)}%)
         </p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex justify-center gap-8 border-b border-gray-200 pb-3">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-2 ${
-              activeTab === tab ? "font-bold border-b-2 border-black" : ""
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {/* Render Active Tab Content */}
-      {renderActiveTab()}
+      <Tabs defaultValue="chart" className="w-1/2 mx-auto mt-6">
+        <TabsList className="grid w-3/4 grid-cols-5 bg-transparent border-b rounded-none">
+          {TABS.map((item, index) => (
+            <TabsTrigger key={index} value={item.value}>
+              {item.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        <TabsContent value="summary">
+          <Summary marketData={marketData} currentPrice={currentPrice} />
+        </TabsContent>
+        <TabsContent value="chart">
+          <Chart
+            data={chartData}
+            selectedRange={selectedRange}
+            setSelectedRange={setSelectedRange}
+            loading={ChartDataLoading}
+          />
+        </TabsContent>
+        <TabsContent value="statistic">
+          <Statistics marketData={marketData} priceChange24h={priceChange24h} />
+        </TabsContent>
+        <TabsContent value="analysis">
+          <Analysis priceChange24h={priceChange24h} />
+        </TabsContent>
+        <TabsContent value="settings">
+          <Settings />
+        </TabsContent>
+      </Tabs>
     </div>
+    // <Fragment />
   );
 };
 

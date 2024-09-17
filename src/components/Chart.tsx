@@ -13,6 +13,7 @@ import {
   ChartData,
 } from "chart.js";
 import annotationPlugin from "chartjs-plugin-annotation";
+import crosshairPlugin from "chartjs-plugin-crosshair";
 import { Chart } from "react-chartjs-2";
 import { useEffect, useRef } from "react";
 
@@ -41,7 +42,8 @@ ChartJS.register(
   Filler,
   BarElement,
   BarController,
-  annotationPlugin
+  annotationPlugin,
+  crosshairPlugin
 );
 
 const ChartComponent = ({ data, volumeData }: Props) => {
@@ -101,6 +103,10 @@ const ChartComponent = ({ data, volumeData }: Props) => {
 
   const chartOptions: ChartOptions<"line" | "bar"> = {
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index", // Ensures that the tooltip works across both datasets
+      intersect: false, // Ensures tooltip appears even if not exactly on a point
+    },
     elements: {
       line: {
         tension: 0,
@@ -158,6 +164,31 @@ const ChartComponent = ({ data, volumeData }: Props) => {
       },
       tooltip: {
         enabled: true,
+        mode: "index", // Show tooltip for both charts at the same index
+        intersect: false, // Show tooltip even when not directly on a data point
+        callbacks: {
+          // Customize tooltip to show both price and volume
+          label: function (tooltipItem) {
+            const price = `Price: ${
+              tooltipItem.datasetIndex === 0 ? tooltipItem.raw : ""
+            }`;
+            const volume = `Volume: ${
+              tooltipItem.datasetIndex === 1 ? tooltipItem.raw : ""
+            }`;
+            return [price, volume].filter(Boolean).join("\n");
+          },
+        },
+      },
+      //@ts-ignore
+      crosshair: {
+        line: {
+          color: "rgba(0, 0, 0, 0.8)", // Color of the vertical line
+          width: 0.6,
+          borderDash: [5, 5],
+        },
+        sync: {
+          enabled: true, // Synchronizes the tooltip for both price and volume
+        },
       },
       annotation: {
         clip: false,

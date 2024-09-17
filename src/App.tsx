@@ -7,10 +7,12 @@ import {
   Statistics,
   Summary,
   Header,
+  Skeleton,
+  ErrorPopup,
+  ChartActions,
 } from "./components";
 import { useCoinData, useChartData } from "./hooks";
 import { TABS } from "./constants/tabs";
-import ChartActions from "./components/ChartActions";
 
 const ChartComponent: React.FC = () => {
   const [selectedRange, setSelectedRange] = useState<string>("1w");
@@ -23,6 +25,9 @@ const ChartComponent: React.FC = () => {
     data: chartData,
     volumeData,
     loading: ChartDataLoading,
+    error,
+    open,
+    setOpen,
   } = useChartData({
     selectedRange,
   });
@@ -33,7 +38,7 @@ const ChartComponent: React.FC = () => {
     !marketData ||
     chartData.length === 0
   ) {
-    return <div className="text-center">Loading...</div>;
+    return <Skeleton expand={expand} />;
   }
 
   const priceChange24h = marketData?.price_change_percentage_24h || 0;
@@ -89,6 +94,15 @@ const ChartComponent: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
+      {error && (
+        <ErrorPopup
+          open={open}
+          error={error}
+          setOpen={setOpen}
+          setSelectedRange={setSelectedRange}
+          selectedRange={selectedRange}
+        />
+      )}
     </div>
   );
 };
